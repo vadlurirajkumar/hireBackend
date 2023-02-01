@@ -7,15 +7,13 @@ export const isAuthenticated = async (req, res, next) => {
   try {
     const { authorization } = req.headers;
     if (!authorization) {
-      res_auth(res, "Token not found, Please login first")
-      console.log("auth "+authorization)
+      res_auth(res, "User not found, Login first!");
     }
-    const token = authorization.split(" ")[1];
-    console.log("token "+token)
+    let token = authorization.split(" ")[1];
 
     var decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await Employee.findById(decoded._id);
-    // console.log(req.user._id)
+
     if (req.user) {
       return next();
     } else {

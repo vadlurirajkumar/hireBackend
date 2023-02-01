@@ -1,25 +1,16 @@
 import mongoose from "mongoose";
-// mongoose.set("strictQuery", true); //^ just for mongoDB warning
+mongoose.set("strictQuery", true); //^ just for mongoDB warning
 
-// const DBconnection = async () => {
-//   try {
-//     const { connection } = await mongoose.connect(process.env.MONGO_URI);
-//     console.log(`DB Connected : ${connection.host}`.cyan.underline);
-//   } catch (error) {
-//     console.log(`Error is : ${error.message}`.red.bold);
-//     process.exit(1);
-//   }
-// };
-
-// const mongoose = require("mongoose");
-mongoose.set("strictQuery", true);
 const DBconnection = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("db is connected");
-  } catch (err) {
-    console.log(err);
+    const {connection} = await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log(`DB Connected at : ${connection.host+" on port :"+connection.port}`.cyan.underline);
+  } catch (error) {
+    console.error(`Error is : ${error.message}`.red.bold);
+    process.exit(1);
   }
 };
 export { DBconnection };

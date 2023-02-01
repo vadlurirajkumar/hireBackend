@@ -8,6 +8,7 @@ import {
   res_success,
 } from "../global/response.js";
 import cloudinary from "cloudinary";
+import fetch from "node-fetch";
 
 //? Employee Signup
 export const register = async (req, res) => {
@@ -168,24 +169,18 @@ export const forgetPassword = async (req, res) => {
     if (!email) {
       return res_failed(res, "Enter your email_id");
     }
-    // else{
-    //   console.log(email)
-    // }
 
     const user = await Employee.findOne({ email });
     if (!user) {
       return res_failed(res, "Invalid Email");
     }
-    // else{
-    //   console.log(user.full_name)
-    // }
 
     //@ Generating OTP
     let otp = generateOtp(6, true, false, false, false);
 
     user.reset_pass_otp = otp;
     user.reset_pass_otp_expiry = new Date(
-      Date.now() + process.env.OTP_EXPIRE * 60 * 1000
+      Date.now() + process.env.OTPToken_EXPIRE * 60 * 1000
     );
     await user.save();
 
@@ -202,6 +197,7 @@ export const forgetPassword = async (req, res) => {
       token,
       null
     );
+    S;
   } catch (error) {
     res_catch(res, error);
   }
@@ -254,7 +250,7 @@ export const changePassword = async (req, res) => {
 
     user.reset_pass_otp = otp;
     user.reset_pass_otp_expiry = new Date(
-      Date.now() + process.env.OTP_EXPIRE * 60 * 1000
+      Date.now() + process.env.OTPToken_EXPIRE * 60 * 1000
     );
     await user.save();
 
@@ -449,7 +445,9 @@ export const deleteSkills = async (req, res) => {
 //? Update Profile picture
 export const updateImage = async (req, res) => {
   try {
-    const result = await cloudinary.v2.uploader.upload(req.file.path);
+    const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      folder: "inkprogAvatars",
+    });
     const user = await Employee.findById(req.user._id);
     let image = await user.avatar.public_id;
     if (result) {
@@ -469,10 +467,7 @@ export const updateImage = async (req, res) => {
     await user.save();
     res_success(res, "profile Updated", user.avatar);
   } catch (error) {
-    // res_catch(res, error);
-    res
-      .status(500)
-      .json({ error: error.message, message: "path not found error" });
+    res_catch(res, error);
   }
 };
 
@@ -494,13 +489,15 @@ export const deleteImage = async (req, res) => {
 //? Update CV
 export const updateCV = async (req, res) => {
   try {
-    if (req.file) {
-      console.log("found")
-      console.log(req.file.path);
-    } else {
-      console.log("not found");
-    }
-    const result = await cloudinary.v2.uploader.upload(req.file.path);
+    // if (req.file) {
+    //   console.log("found")
+    //   console.log(req.file.path);
+    // } else {
+    //   console.log("not found");
+    // }
+    const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      folder: "inkprogCVs",
+    });
     const user = await Employee.findById(req.user._id);
     let file = await user.cv.public_id;
 
@@ -522,6 +519,39 @@ export const updateCV = async (req, res) => {
     res_success(res, "CV has updated", user.cv);
   } catch (error) {
     res_catch(res, error);
+  }
+};
+
+//? Download CV
+export const downloadCV = async (req, res) => {
+  try {
+    const user = await Employee.findById(req.user._id);
+
+    const cloudinaryUrl = user.cv.url;
+    console.log(cloudinaryUrl)
+    console.log(process.env.CLOUDINARY_API_KEY)
+    console.log(process.env.CLOUDINARY_API_SECRET)
+    const options = {
+      headers: {
+        "Content-Type": "application/pdf",
+        "x-api-key": process.env.CLOUDINARY_API_KEY,
+        "x-api-secret": process.env.CLOUDINARY_API_SECRET,
+      },
+    };
+    const response = await fetch(cloudinaryUrl, options);
+    if (!response.ok) {
+      console.log("error")
+      throw new Error(response.status);
+    }else{
+      console.log(`res = ${response}`)
+    }
+    const pdfBlob = await response.blob();
+    res.set("Content-Type", "application/pdf");
+    res.set("Content-Disposition", `attachment; filename=${user.cv.public_id}`);
+    res.send(pdfBlob);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json("Failed error")
   }
 };
 

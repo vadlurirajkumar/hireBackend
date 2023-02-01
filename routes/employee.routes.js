@@ -22,7 +22,8 @@ import {
   updateCV,
   deleteCV,
   updateBanner,
-  deleteBanner
+  deleteBanner,
+  downloadCV
 } from "../controllers/employee.service.js";
 
 //@ Upload Image and Files
@@ -53,7 +54,7 @@ employeeRouter.patch("/updateprofile", isAuthenticated, updateMyProfile);
 employeeRouter.patch("/updateimg", isAuthenticated, uploadImage.single('image'), updateImage);
 employeeRouter.delete("/deleteimg", isAuthenticated, deleteImage);
 employeeRouter.patch("/updatecv", isAuthenticated,uploadCV.single("cv_file"), updateCV);
-employeeRouter.delete("/deletecv", isAuthenticated, deleteCV);
+employeeRouter.get("/downloadcv", isAuthenticated, downloadCV);
 employeeRouter.patch("/updatebanner", isAuthenticated, uploadBannerImage.single("bannerImage"), updateBanner);
 employeeRouter.delete("/deletebanner", isAuthenticated, deleteBanner);
 

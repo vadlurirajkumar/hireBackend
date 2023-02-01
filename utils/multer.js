@@ -20,7 +20,7 @@ export const uploadCV = multer({
   storage: multer.diskStorage({}),
   fileFilter(req, file, cb) {
     const ext = path.extname(file.originalname)
-    console.log("ext = "+ext)
+    // console.log("ext = "+ext)
     if (!ext.match(/\.(pdf)$/)) {
       return cb(
         new Error(

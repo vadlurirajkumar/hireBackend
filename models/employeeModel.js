@@ -154,5 +154,8 @@ employeeSchema.methods.generateToken = function () {
   });
 };
 
+//@ to Expire the OTP
+employeeSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
+
 const Employee = mongoose.model("Employee", employeeSchema);
 export { Employee };

@@ -114,6 +114,9 @@ employerSchema.methods.generateToken = function () {
   });
 };
 
+//@ to Expire the OTP
+employerSchema.index({ otp_expiry: 1 }, { expireAfterSeconds: 0 });
+
 const Employer = mongoose.model("Employer", employerSchema);
 
 export { Employer };
